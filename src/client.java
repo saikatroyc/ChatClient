@@ -11,10 +11,11 @@ public class client {
     static int destPort = 12345;
     static String clientName;
     static boolean validName = false;
+    static boolean chatEnded = false;
+    static BufferedReader in = null;
+    static PrintWriter out = null;
+
     public static void main(String[] args) {
-        // TODO Auto-generated method stub
-        BufferedReader in = null;
-        PrintWriter out = null;
         try {
             server = new Socket("localhost", destPort);
             in = new BufferedReader(new InputStreamReader(
@@ -34,6 +35,9 @@ public class client {
                 }
             }
 
+            // now that client has registered start a new thread
+            // which will listen to server broadcasts
+            new ServerChatHandler().start();
             while(true) {
                 System.out.println("enter ur chat:");
                 String user = sIn.readLine();
@@ -58,5 +62,24 @@ public class client {
             }
             System.out.println("END SESSION!!");
         }
+    }
+    
+    public static class ServerChatHandler extends Thread { 
+        ServerChatHandler() {}
+        public void run() {
+            if (in == null) return;
+            String line;
+            try {
+                while ((line = in.readLine()) != null
+                            && chatEnded == false) {
+                    System.out.println(line);
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                System.out.println(e.getMessage());
+            }
+            
+        }
+        
     }
 }
